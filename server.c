@@ -13,6 +13,7 @@ int send_response(int client_socket, const char *response) {
         perror("error sending response to client");
         return -1;
     }
+    return 0;
 }
 
 int create_socket(int port) {
