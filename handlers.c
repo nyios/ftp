@@ -33,12 +33,6 @@ void handle_passive(char *argument, int client_socket){
 
 }
 
-void handle_quit(char *argument, int client_socket){
-    if (state.pasv)
-        close(state.pasv_socket);
-    send_response(client_socket, "221 Goodbye.\r\n");
-}
-
 void handle_syst(char *argument, int client_socket){
     send_response(client_socket, "UNIX Type: I\r\n");
 }
@@ -96,3 +90,29 @@ void handle_retrieve(char *argument, int client_socket){
 void handle_type(char *argument, int client_socket){
     send_response(client_socket, "200 Switching to binary mode.\r\n");
 }
+
+void handle_cwd(char *argument, int client_socket) {
+    if(chdir(argument) == 0) {
+        send_response(client_socket, "250 Directory successfully changed.\r\n");
+    } else {
+        send_response(client_socket, "550 Failed to change directory.\r\n");
+    }
+
+}
+void handle_delete(char *argument, int client_socket) {
+    if(unlink(argument) == 0){
+        send_response(client_socket, "250 Requested file action okay, completed.\r\n");
+    } else {
+        send_response(client_socket, "550 File unavailable.\r\n");
+    }
+}
+
+void handle_delete_dir(char *argument, int client_socket) {
+    puts(argument);
+    if(rmdir(argument) == 0){
+        send_response(client_socket, "250 Requested file action okay, completed.\r\n");
+    } else {
+        send_response(client_socket, "550 File unavailable.\r\n");
+    }
+}
+

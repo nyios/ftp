@@ -18,9 +18,9 @@ void handle_client(int client_socket);
 int server_socket;
 Server_State state = {false, 0};
 
-void(*func_ptrs [NUM_COMMANDS])(char*, int) = {handle_list, handle_passive, handle_password, 
-    handle_retrieve, handle_syst, handle_type, handle_user, handle_quit};
-char* commands [NUM_COMMANDS] = {"LIST", "PASV", "PASS", "RETR", "SYST", "TYPE", "USER", "QUIT"};
+void(*func_ptrs [NUM_COMMANDS])(char*, int) = {handle_cwd, handle_delete, handle_list, handle_passive, handle_password, 
+    handle_retrieve, handle_delete_dir, handle_syst, handle_type, handle_user};
+char* commands [NUM_COMMANDS] = {"CWD", "DELE", "LIST", "PASV", "PASS", "RETR", "RMD", "SYST", "TYPE", "USER"};
 
 static int get_index(char* string) {
     for (int i = 0; i < sizeof(commands) / sizeof(char*); ++i) {
@@ -122,15 +122,15 @@ void handle_client(int client_socket) {
             argument[0] = '\0';
 
         int i = get_index(command);
-        if (i < 0) {
-            fprintf(stderr, "unknown command %s with argument %s\n", command, argument);
-            if (send_response(client_socket, "502 Command not implemented.\r\n") < 0)
-                break;
-        } else if (strcmp(command, "QUIT") == 0){
+        if (strcmp(command, "QUIT") == 0){
             if (state.pasv)
                 close(state.pasv_socket);
             send_response(client_socket, "221 Goodbye.\r\n");
             break;
+        } else if (i < 0) {
+            fprintf(stderr, "unknown command %s with argument %s\n", command, argument);
+            if (send_response(client_socket, "502 Command not implemented.\r\n") < 0)
+                break;
         } else {
             func_ptrs[i](argument, client_socket);
         }
